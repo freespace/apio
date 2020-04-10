@@ -108,13 +108,16 @@ src_sim = [str(f) for f in v_nodes]
 # --------- Get the Testbench file (there should be only 1)
 # -- Create a list with all the files finished in _tb.v. It should contain
 # -- the test bench
-if TESTBENCH:
-    list_tb = [TESTBENCH]
-else:
-    list_tb = [f for f in src_sim if f[-5:].upper() == '_TB.V']
+list_tb = [f for f in src_sim if f[-5:].upper() == '_TB.V']
 
-if len(list_tb) > 1:
-    print('Warning: more than one testbenches used')
+# if TESTBENCH is given insert it into position 0 so it will
+# be used. We need to keep the other entries in list_tb
+# so they won't be compiled later
+if TESTBENCH:
+    list_tb.insert(0, TESTBENCH)
+else:
+    if len(list_tb) > 1:
+        print('Warning: more than one testbenches used')
 
 # -- Error checking
 try:
@@ -220,12 +223,19 @@ t = env.Alias('time', rpt)
 AlwaysBuild(t)
 
 # -- Icarus Verilog builders
+def tb_filter(target, source, env):
+    if testbench:
+        return target, [testbench] + src_synth
+    else:
+        return target, source
+
 iverilog = Builder(
     action='iverilog {0} -o $TARGET -D VCD_OUTPUT={1} {2}/ice40/cells_sim.v $SOURCES'.format(
         IVER_PATH, TARGET_SIM, YOSYS_PATH),
     suffix='.out',
     src_suffix='.v',
-    source_scanner=list_scanner)
+    source_scanner=list_scanner,
+    emitter=tb_filter)
 
 # NOTE: output file name is defined in the iverilog call using VCD_OUTPUT macro
 vcd = Builder(
