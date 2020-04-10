@@ -29,6 +29,8 @@ VERILATOR_NO_WARN = ARGUMENTS.get('nowarn', '').split(',')
 VERILATOR_WARN = ARGUMENTS.get('warn', '').split(',')
 VERILATOR_TOP = ARGUMENTS.get('top', '')
 VERILATOR_PARAM_STR = ''
+TESTBENCH = ARGUMENTS.get('testbench')
+
 for warn in VERILATOR_NO_WARN:
     if warn != '':
         VERILATOR_PARAM_STR += ' -Wno-' + warn
@@ -106,7 +108,10 @@ src_sim = [str(f) for f in v_nodes]
 # --------- Get the Testbench file (there should be only 1)
 # -- Create a list with all the files finished in _tb.v. It should contain
 # -- the test bench
-list_tb = [f for f in src_sim if f[-5:].upper() == '_TB.V']
+if TESTBENCH:
+    list_tb = [TESTBENCH]
+else:
+    list_tb = [f for f in src_sim if f[-5:].upper() == '_TB.V']
 
 if len(list_tb) > 1:
     print('Warning: more than one testbenches used')

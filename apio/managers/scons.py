@@ -65,10 +65,16 @@ class SCons(object):
                                                           'yosys'])
 
     @util.command
-    def sim(self):
-        var, board, arch = process_arguments(None, self.resources)
-        return self.run('sim', arch=arch, packages=['scons', 'iverilog',
-                                                    'yosys', 'gtkwave'])
+    def sim(self, testbench=None):
+        _, board, arch = process_arguments(None, self.resources)
+        if testbench:
+            var = format_vars({
+                'testbench':testbench,
+            })
+        else:
+            var = []
+        return self.run('sim', var, arch=arch, packages=['scons', 'iverilog',
+                                                                   'yosys', 'gtkwave'])
 
     @util.command
     def build(self, args):
