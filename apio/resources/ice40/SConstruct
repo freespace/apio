@@ -13,7 +13,7 @@ from platform import system
 
 from SCons.Script import (Builder, DefaultEnvironment, Default, AlwaysBuild,
                           GetOption, Exit, COMMAND_LINE_TARGETS, ARGUMENTS,
-                          Variables, Help, Glob)
+                          Variables, Help, Glob, Clean)
 
 # -- Load arguments
 PROG = ARGUMENTS.get('prog', '')
@@ -283,4 +283,12 @@ Default(bitstream)
 
 # -- These is for cleaning the files generated using the alias targets
 if GetOption('clean'):
+    # This is needed so all testbench output is removed
+    # instead of just the first one found
+    for f in Glob('*.vcd'):
+        Clean(t, f)
+
+    for f in Glob('*.out'):
+        Clean(t, f)
+
     env.Default([t, vout, sout, vcd_file])
